@@ -36,3 +36,63 @@
     transform: rotate(360deg);
   }
 }
+/* Container for the entire app */
+.App {
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Styling for the banner */
+/* Styling for the banner with background image */
+.banner {
+  background-image: url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExYnI5Zzd0YTd3eDFwbXA5dWJobmptNnI3bjlvZzBqZDV2ZHRieGlobSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3rgXBDOAgVBfi2t3QA/giphy.gif'); /* Replace with your image URL */
+  background-size: cover;
+  background-position: center;
+  color: #ffffff;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Flexbox layout for banner content */
+.banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* Styling for the banner image */
+.banner-image {
+  width: 100px;  /* Adjust size as needed */
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  outline: none; /* Remove blue border */
+}
+
+/* Styling for the header text */
+.banner h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Styling for the welcome GIF */
+.welcome-gif {
+  max-width: 100%;
+  height: auto;
+  margin-top: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  outline: none; /* Remove blue border */
+}
+
+/* Main content styling */
+main {
+  padding: 20px;
+}
+
+/* Other styles for the form, buttons, etc. */

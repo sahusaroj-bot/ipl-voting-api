@@ -1,18 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import axios from 'axios';
+ import '../styles/MatchByDate.css';
 
 function MatchesByDate({ token }) {
-    const [date, setDate] = useState('');
+    const [today, setToday] = useState('');
     const [matches, setMatches] = useState([]);
+
+    useEffect(() => {
+        // Fetch today's date
+        const currentDate = new Date();
+        // Format the date as yyyy-mm-dd
+        const formattedDate = currentDate.toISOString().split('T')[0];
+        // Update the state with today's date
+        setToday(formattedDate);
+    }, []);
+    
+
 
     const fetchMatchesByDate = async () => {
         try {
-            const response = await axios.get(`https://ipl-voting-management-prod.onrender.com/getMatcheByDate`, {
-           // const response = await axios.get(`http://localhost:8080/getMatcheByDate`, {
-                params:{date},
+            const date=today;
+            //const response = await axios.get('http://localhost:8080/by-date', {
+            const response = await axios.get( `https://ipl-voting-management-prod.onrender.com/by-date`,{
+                params: { date },
                 headers: {
-                     Authorization: `Bearer ${token}`
-                     }
+                    Authorization: `Bearer ${token}`
+                }
             });
             setMatches(response.data);
         } catch (error) {
@@ -20,19 +33,32 @@ function MatchesByDate({ token }) {
         }
     };
 
+    const handleTeamClick = (teamName) => {
+        console.log('Team clicked:', teamName);
+    };
+
     return (
         <div>
-            <h2>Fetch Matches by Date</h2>
-            <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-            />
-            <button onClick={fetchMatchesByDate}>Fetch Matches</button>
+            <h1 className='label'>Fetch Matches by Date</h1>
+            
+            <button  className='button' onClick={fetchMatchesByDate}>Fetch Matches </button>
             <ul>
                 {matches.map(match => (
                     <li key={match.id}>
-                        {new Date(match.date).toLocaleDateString()}: {match.team1} vs {match.team2}
+                        {today}: 
+                        <button 
+                            onClick={() => handleTeamClick(match.team1)} 
+                            className="button"
+                        >
+                            {match.team1}
+                        </button> 
+                        vs 
+                        <button 
+                            onClick={() => handleTeamClick(match.team2)} 
+                            className="button"
+                        >
+                            {match.team2}
+                        </button>
                     </li>
                 ))}
             </ul>

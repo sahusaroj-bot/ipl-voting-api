@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import '../styles/MatchByDate.css'; // Import the CSS file
 
-function Login({ setToken ,setName}) {
+function Login({ setToken ,setName,setUserID}) {
     const [id, setId] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -27,6 +27,7 @@ function Login({ setToken ,setName}) {
             );
             setToken(response.data.token);
             setName(username);
+            setUserID(id);
            
             alert('Login successful!');
         } catch (error) {

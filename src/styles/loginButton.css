@@ -1,0 +1,110 @@
+.submit,
+.submit *,
+.submit :after,
+.submit :before,
+.submit:after,
+.submit:before {
+  border: 0 solid;
+  box-sizing: border-box;
+}
+
+.submit {
+    height: 50;
+
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: button;
+  background-color: #000;
+  background-image: none;
+  color: #b5ff9f;
+  cursor: pointer;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
+    Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  font-size: 70%;
+  line-height: 1.5;
+  margin: 0;
+  -webkit-mask-image: -webkit-radial-gradient(#000, #fff);
+  padding: 0;
+}
+
+.submit:disabled {
+  cursor: default;
+}
+
+.submit:-moz-focusring {
+  outline: auto;
+}
+
+.submit svg {
+  display: block;
+  vertical-align: middle;
+}
+
+.submit [hidden] {
+  display: none;
+}
+
+.submit {
+  border: 1px solid;
+  border-radius: 999px;
+  box-sizing: border-box;
+  display: block;
+  font-weight: 900;
+  overflow: hidden;
+  padding: 1.2rem 3rem;
+  position: relative;
+  text-transform: uppercase;
+}
+
+.submit .original {
+  background: #75ebef;
+  color: #000;
+  display: grid;
+  inset: 0;
+  place-content: center;
+  position: absolute;
+  transition: transform 0.3s cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+.submit:hover .original {
+  transform: translateY(100%);
+}
+
+.submit .letters {
+  display: inline-flex;
+}
+
+.submit span {
+  opacity: 0;
+  transform: translateY(-15px);
+  transition: transform 0.3s cubic-bezier(0.87, 0, 0.13, 1), opacity 0.3s;
+}
+
+.submit span:nth-child(2n) {
+  transform: translateY(15px);
+}
+
+.submit:hover span {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.submit:hover span:nth-child(2) {
+  transition-delay: 0.1s;
+}
+
+.submit:hover span:nth-child(3) {
+  transition-delay: 0.2s;
+}
+
+.submit:hover span:nth-child(4) {
+  transition-delay: 0.3s;
+}
+
+.submit:hover span:nth-child(5) {
+  transition-delay: 0.4s;
+}
+
+.submit:hover span:nth-child(6) {
+  transition-delay: 0.5s;
+}

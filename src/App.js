@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import MatchesByDate from './components/MatchesByDate';
 import './App.css';
@@ -8,33 +9,16 @@ function App() {
     const [name, setName] = useState('');
     const [userID, setUserID] = useState('');
 
-
-    if (!token) {
-        return <Login setToken={setToken} setName={setName} setUserID={setUserID} />;
-    }
-
     return (
-        <div className="App">
-            <header className="banner">
-                <div className="banner-content">
-                    <img
-                        src="https://i.ibb.co/fkkFJd7/ipl-2025-banner.webp"
-                        alt="Banner"
-                        className="banner-image"
-                    />
-                    <h1 className='label'> Welcome to IPL Voting, {name}!</h1>
-                </div>
-                <img
-                    src="https://i.ibb.co/fkkFJd7/ipl-2025-banner.webp" // Example GIF URL
-                    alt="Welcome GIF"
-                    className="welcome-gif"
-                />
-            </header>
-            <main>
-                <MatchesByDate token={token} userID={userID} />
-                {/* Add your voting functionality here */}
-            </main>
-        </div>
+        <Router>
+            <div className="App">
+                <Routes>
+                    <Route path="/login" element={<Login setToken={setToken} setName={setName} setUserID={setUserID} />} />
+                    <Route path="/matches-by-date" element={token ? <MatchesByDate token={token} userID={userID} /> : <Navigate to="/login" />} />
+                    <Route path="*" element={<Navigate to="/login" />} />
+                </Routes>
+            </div>
+        </Router>
     );
 }
 

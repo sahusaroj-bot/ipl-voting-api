@@ -13,26 +13,26 @@ function MatchesByDate({ token, userID }) {
         const currentDate = new Date();
         const formattedDate = currentDate.toISOString().split('T')[0];
         setToday(formattedDate);
-
+        const fetchMatchesByDate = async (date) => {
+            try {
+                const response = await axios.get(`https://ipl-voting-management-prod.onrender.com/by-date`, {
+                //const response = await axios.get(`http://localhost:8080/by-date`, {
+                    params: { date },
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                setMatches(response.data);
+                console.log(response);
+            } catch (error) {
+                console.error('Error fetching matches:', error);
+            }
+        };
         // Fetch matches by date
         fetchMatchesByDate(formattedDate);
-    }, []);
+    }, [token]);
 
-    const fetchMatchesByDate = async (date) => {
-        try {
-            const response = await axios.get(`https://ipl-voting-management-prod.onrender.com/by-date`, {
-           // const response = await axios.get(`http://localhost:8080/by-date`, {
-                params: { date },
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            setMatches(response.data);
-            console.log(response);
-        } catch (error) {
-            console.error('Error fetching matches:', error);
-        }
-    };
+   
 
     const postVote = async (team, matchid) => {
         try {
@@ -42,23 +42,25 @@ function MatchesByDate({ token, userID }) {
                 voted_team_name: team
             };
 
-            const response = await axios.post(`https://ipl-voting-management-prod.onrender.com/Insertvote`, jsonData, {
-                headers: {
+           const response = await axios.post(`https://ipl-voting-management-prod.onrender.com/Insertvote`, jsonData, {
+          //  const response = await axios.post(`http://localhost:8080/Insertvote`, jsonData, {
+                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
-            });
+            }
+            
+        );
            
             if (response.status === 200) {
                 setServerResponse('Success: Vote saved successfully');
+                alert("Vote saved successfully");
             } 
-            else if (response.status === 500) {
-                setServerResponse('You already Voted');
+            else{
+                setServerResponse(response.data.message);
                 alert("duplicate voting is not allowed ");
             } 
-            else {
-                setServerResponse('Failed: Unable to save vote');
-            }
+          
         } catch (error) {
             console.error('Error posting vote:', error);
         }

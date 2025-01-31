@@ -12,6 +12,7 @@ function App() {
     return (
         <Router>
             <div className="App">
+                 {name && <h1>Welcome, {name}!</h1>}
                 <Routes>
                     <Route path="/login" element={<Login setToken={setToken} setName={setName} setUserID={setUserID} />} />
                     <Route path="/matches-by-date" element={token ? <MatchesByDate token={token} userID={userID} /> : <Navigate to="/login" />} />

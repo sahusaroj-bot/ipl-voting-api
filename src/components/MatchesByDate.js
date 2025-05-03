@@ -176,7 +176,7 @@ function MatchesByDate() {
             <h1>Vote for your Favorite Team</h1>
             <span><h1 className="label">E sala cup namde</h1></span>
             <img
-                src="https://ibb.co/ksspmjTD"
+                src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMTU0cDZuMDN5eXZnbGdjdjhtZDYya296M3IxMm1zaGFybjc1c2gyNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/O5tE2s5LLnDyPOFHIX/giphy.gif"
                 alt="RCB"
                 className="w-full max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg mx-auto"
             />

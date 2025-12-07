@@ -16,8 +16,8 @@ function Login({ setToken, setName, setUserID }) {
         event.preventDefault();
         setLoading(true);
         try {
-             const response = await axios.post('https://ipl-voting-management-prod.onrender.com/login',
-                 //const response = await axios.post('http://localhost:8080/login',
+           // const response = await axios.post('https://ipl-voting-management-prod.onrender.com/login',
+              const response = await axios.post('http://13.126.210.216:8080/login',
                 { id, username, password },
                 { 
                     headers: {
@@ -25,17 +25,12 @@ function Login({ setToken, setName, setUserID }) {
                     }
                 }
             );
-
-            // Save token, username, and userID to localStorage
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('name', username);
-            localStorage.setItem('userID', id);
-
-            // Update state with retrieved values
             setToken(response.data.token);
             setName(username);
             setUserID(id);
-
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('name', username);
+            localStorage.setItem('userID', id);
             alert('Login successful!');
             navigate('/matches-by-date'); // Redirect to MatchesByDate page
         } catch (error) {

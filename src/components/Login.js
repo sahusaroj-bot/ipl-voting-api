@@ -17,7 +17,7 @@ function Login({ setToken, setName, setUserID }) {
         setLoading(true);
         try {
            // const response = await axios.post('https://ipl-voting-management-prod.onrender.com/login',
-              const response = await axios.post('http://13.126.210.216:8080/login',
+              const response = await axios.post('https://api.iplvote.co.in/login',
                 { id, username, password },
                 { 
                     headers: {

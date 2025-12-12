@@ -23,8 +23,8 @@ function Login({ setToken, setName, setUserID }) {
 
     const handleLogin = async () => {
         try {
-            // const response = await axios.post('https://api.iplvote.co.in/login',
-            const response = await axios.post('http://localhost:8080/login',
+            const response = await axios.post('https://api.iplvote.co.in/login',
+            // const response = await axios.post('http://localhost:8080/login',
                 { username, password },
                 { 
                     headers: {
@@ -53,8 +53,8 @@ function Login({ setToken, setName, setUserID }) {
 
     const handleRegister = async () => {
         try {
-            // await axios.post('https://api.iplvote.co.in/register',
-            await axios.post('http://localhost:8080/register',
+            await axios.post('https://api.iplvote.co.in/register',
+            // await axios.post('http://localhost:8080/register',
                 { username, email, password },
                 { 
                     headers: {

@@ -3,38 +3,72 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 function Login({ setToken, setName, setUserID }) {
-    const [id, setId] = useState('');
     const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false); 
+    const [loading, setLoading] = useState(false);
+    const [isRegister, setIsRegister] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true);
+        
+        if (isRegister) {
+            await handleRegister();
+        } else {
+            await handleLogin();
+        }
+    };
+
+    const handleLogin = async () => {
         try {
-           // const response = await axios.post('https://ipl-voting-management-prod.onrender.com/login',
-              const response = await axios.post('https://api.iplvote.co.in/login',
-                { id, username, password },
+            // const response = await axios.post('https://api.iplvote.co.in/login',
+            const response = await axios.post('http://localhost:8080/login',
+                { username, password },
                 { 
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 }
             );
-            setToken(response.data.token);
-            setName(username);
-            setUserID(id);
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('name', username);
-            localStorage.setItem('userID', id);
-            alert('Login successful!');
-            navigate('/matches-by-date'); // Redirect to MatchesByDate page
+            setToken(response.data.accessToken);
+            setName(response.data.username);
+            setUserID(response.data.userId);
+            localStorage.setItem('token', response.data.accessToken);
+            localStorage.setItem('name', response.data.username);
+            localStorage.setItem('userID', response.data.userId);
+            alert(`Login successful! Your User ID is: ${response.data.userId}`);
+            navigate('/matches-by-date');
         } catch (error) {
-            if (error.response) {
-                alert('Invalid credentials, please try again.');
+            if (error.response?.data?.error) {
+                alert(error.response.data.error);
             } else {
                 alert('Network error, please try again later.');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRegister = async () => {
+        try {
+            // await axios.post('https://api.iplvote.co.in/register',
+            await axios.post('http://localhost:8080/register',
+                { username, email, password },
+                { 
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            alert('Registration successful! Please login with your username.');
+            setIsRegister(false);
+        } catch (error) {
+            if (error.response?.data?.error) {
+                alert(error.response.data.error);
+            } else {
+                alert('Registration failed, please try again.');
             }
         } finally {
             setLoading(false);
@@ -59,35 +93,12 @@ function Login({ setToken, setName, setUserID }) {
                         </svg>
                     </div>
                     <h1 className="text-4xl font-bold text-white mb-2">IPL Voting</h1>
-                    <p className="text-gray-300">Welcome back! Please sign in to continue</p>
+                    <p className="text-gray-300">{isRegister ? 'Create your account to get started' : 'Welcome back! Please sign in to continue'}</p>
                 </div>
 
-                {/* Login Form */}
+                {/* Form */}
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-8">
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* User ID Input */}
-                        <div className="space-y-2">
-                            <label htmlFor="id" className="text-sm font-medium text-gray-200 block">
-                                User ID
-                            </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                </div>
-                                <input
-                                    type="text"
-                                    id="id"
-                                    placeholder="Enter your User ID"
-                                    className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm"
-                                    value={id}
-                                    onChange={(e) => setId(e.target.value)}
-                                    required
-                                />
-                            </div>
-                        </div>
-
                         {/* Username Input */}
                         <div className="space-y-2">
                             <label htmlFor="username" className="text-sm font-medium text-gray-200 block">
@@ -110,6 +121,31 @@ function Login({ setToken, setName, setUserID }) {
                                 />
                             </div>
                         </div>
+
+                        {/* Email Input - Only for Register */}
+                        {isRegister && (
+                            <div className="space-y-2">
+                                <label htmlFor="email" className="text-sm font-medium text-gray-200 block">
+                                    Email
+                                </label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                                        </svg>
+                                    </div>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        placeholder="Enter your email"
+                                        className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        )}
 
                         {/* Password Input */}
                         <div className="space-y-2">
@@ -134,7 +170,7 @@ function Login({ setToken, setName, setUserID }) {
                             </div>
                         </div>
 
-                        {/* Login Button */}
+                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={loading}
@@ -146,17 +182,28 @@ function Login({ setToken, setName, setUserID }) {
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    <span>Signing in...</span>
+                                    <span>{isRegister ? 'Creating account...' : 'Signing in...'}</span>
                                 </>
                             ) : (
                                 <>
                                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isRegister ? "M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" : "M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"} />
                                     </svg>
-                                    <span>Sign In</span>
+                                    <span>{isRegister ? 'Create Account' : 'Sign In'}</span>
                                 </>
                             )}
                         </button>
+
+                        {/* Toggle between Login and Register */}
+                        <div className="text-center">
+                            <button
+                                type="button"
+                                onClick={() => setIsRegister(!isRegister)}
+                                className="text-gray-300 hover:text-white transition-colors duration-200 text-sm underline"
+                            >
+                                {isRegister ? 'Already have an account? Sign in' : "Don't have an account? Register"}
+                            </button>
+                        </div>
                     </form>
 
                     {/* Footer Links */}

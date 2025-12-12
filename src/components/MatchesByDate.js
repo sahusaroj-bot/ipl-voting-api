@@ -31,8 +31,8 @@ function MatchesByDate() {
         const fetchMatchesByDate = async (date) => {
             try {
                 // Axios GET request for fetching matches
-                //const response = await axios.get(`http://localhost:8080/by-date`, {
-                const response = await axios.get(`https://api.iplvote.co.in/by-date`, {
+                const response = await axios.get(`http://localhost:8080/by-date`, {
+                //const response = await axios.get(`https://api.iplvote.co.in/by-date`, {
                     params: { date }, // Sending date as a query parameter
                     headers: {
                         Authorization: `Bearer ${token}` // Setting Authorization header
@@ -49,8 +49,8 @@ function MatchesByDate() {
         const fetchMoney = async () => {
             try {
                 // Axios GET request for fetching money
-                const response = await axios.get(`https://api.iplvote.co.in/getMoney`, {
-                //const response = await axios.get(`http://localhost:8080/getMoney`, {
+                //const response = await axios.get(`https://api.iplvote.co.in/getMoney`, {
+                const response = await axios.get(`http://localhost:8080/getMoney`, {
                     params: { id: userID }, // Sending user ID as a query parameter
                     headers: {
                         Authorization: `Bearer ${token}` // Setting Authorization header
@@ -79,8 +79,8 @@ function MatchesByDate() {
             };
 
             // Axios POST request for submitting a vote
-            const response = await axios.post(`https://api.iplvote.co.in/Insertvote`, jsonData, {
-            //const response = await axios.post(`http://localhost:8080/Insertvote`, jsonData, {
+            //const response = await axios.post(`https://api.iplvote.co.in/Insertvote`, jsonData, {
+            const response = await axios.post(`http://localhost:8080/Insertvote`, jsonData, {
                 headers: {
                     Authorization: `Bearer ${token}`, // Setting Authorization header
                     'Content-Type': 'application/json' // Setting content type

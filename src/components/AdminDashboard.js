@@ -6,20 +6,11 @@ function AdminDashboard() {
     const [users, setUsers] = useState([]);
     const [matches, setMatches] = useState([]);
     const [activeTab, setActiveTab] = useState('users');
-    const [loading, setLoading] = useState(false);
+
     const navigate = useNavigate();
 
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
-
-    useEffect(() => {
-        if (!token || role !== 'ADMIN') {
-            navigate('/login');
-            return;
-        }
-        fetchUsers();
-        fetchMatches();
-    }, [token, role, navigate]);
 
     const fetchUsers = async () => {
         try {
@@ -42,6 +33,15 @@ function AdminDashboard() {
             console.error('Error fetching matches:', error);
         }
     };
+
+    useEffect(() => {
+        if (!token || role !== 'ADMIN') {
+            navigate('/login');
+            return;
+        }
+        fetchUsers();
+        fetchMatches();
+    }, [token, role, navigate, fetchUsers, fetchMatches]);
 
     const addUser = async (userData) => {
         try {

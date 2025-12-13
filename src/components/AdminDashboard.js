@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,7 +12,7 @@ function AdminDashboard() {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
 
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         try {
             const response = await axios.get('https://api.iplvote.co.in/admin/users', {
                 headers: { Authorization: `Bearer ${token}` }
@@ -21,9 +21,9 @@ function AdminDashboard() {
         } catch (error) {
             console.error('Error fetching users:', error);
         }
-    };
+    }, [token]);
 
-    const fetchMatches = async () => {
+    const fetchMatches = useCallback(async () => {
         try {
             const response = await axios.get('https://api.iplvote.co.in/admin/matches', {
                 headers: { Authorization: `Bearer ${token}` }
@@ -32,7 +32,7 @@ function AdminDashboard() {
         } catch (error) {
             console.error('Error fetching matches:', error);
         }
-    };
+    }, [token]);
 
     useEffect(() => {
         if (!token || role !== 'ADMIN') {

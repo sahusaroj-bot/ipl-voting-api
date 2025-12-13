@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Login from './components/Login';
+import AdminLogin from './components/AdminLogin';
+import AdminDashboard from './components/AdminDashboard';
 import MatchesByDate from './components/MatchesByDate';
 import './App.css';
 
@@ -34,6 +36,8 @@ function App() {
             <div className="App">
                 <Routes>
                     <Route path="/login" element={<Login setToken={setToken} setName={setName} setUserID={setUserID} />} />
+                    <Route path="/admin-login" element={<AdminLogin />} />
+                    <Route path="/admin-dashboard" element={<AdminDashboard />} />
                     <Route path="/matches-by-date" element={token ? <MatchesByDate token={token} userID={userID} name={name} /> : <Navigate to="/login" />} />
                     <Route path="*" element={<Navigate to="/login" />} />
                 </Routes>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import InfoModal from './InfoModal';
 
 function Login({ setToken, setName, setUserID }) {
     const [username, setUsername] = useState('');
@@ -11,6 +12,7 @@ function Login({ setToken, setName, setUserID }) {
     const [loading, setLoading] = useState(false);
     const [isRegister, setIsRegister] = useState(false);
     const [isChangePassword, setIsChangePassword] = useState(false);
+    const [showInfoModal, setShowInfoModal] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
@@ -316,12 +318,15 @@ function Login({ setToken, setName, setUserID }) {
                                 <span>Results</span>
                             </a>
                             <span className="text-gray-500">•</span>
-                            <a href="#information" className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center space-x-1">
+                            <button
+                                onClick={() => setShowInfoModal(true)}
+                                className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center space-x-1"
+                            >
                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <span>Info</span>
-                            </a>
+                            </button>
                         </div>
                         
                         {/* Admin Login Button */}
@@ -343,6 +348,12 @@ function Login({ setToken, setName, setUserID }) {
                     </div>
                 </div>
             </div>
+            
+            {/* Info Modal */}
+            <InfoModal 
+                isOpen={showInfoModal} 
+                onClose={() => setShowInfoModal(false)} 
+            />
         </div>
     );
 }

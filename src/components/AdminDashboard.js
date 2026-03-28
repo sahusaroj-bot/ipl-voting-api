@@ -56,7 +56,7 @@ function AdminDashboard() {
         fetchUsers();
         fetchMatches();
         fetchTeams();
-    }, [token, role, navigate, fetchUsers, fetchMatches]);
+    }, [token, role, navigate, fetchUsers, fetchMatches, fetchTeams]);
 
     const addUser = async (userData) => {
         try {

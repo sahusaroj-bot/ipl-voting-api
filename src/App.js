@@ -5,6 +5,7 @@ import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
 import MatchesByDate from './components/MatchesByDate';
 import AccountantDashboard from './components/AccountantDashboard';
+import Results from './components/Results';
 import './App.css';
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
                     <Route path="/admin-dashboard" element={<AdminDashboard />} />
                     <Route path="/accountant-dashboard" element={<AccountantDashboard />} />
                     <Route path="/matches-by-date" element={token ? <MatchesByDate token={token} userID={userID} name={name} /> : <Navigate to="/login" />} />
+                    <Route path="/previous-results" element={<Results />} />
                     <Route path="*" element={<Navigate to="/login" />} />
                 </Routes>
             </div>

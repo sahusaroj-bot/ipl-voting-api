@@ -2,9 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const API = process.env.REACT_APP_API_URL;
+
 function AdminDashboard() {
     const [users, setUsers] = useState([]);
     const [matches, setMatches] = useState([]);
+    const [teams, setTeams] = useState([]);
     const [activeTab, setActiveTab] = useState('users');
 
     const navigate = useNavigate();
@@ -12,9 +15,20 @@ function AdminDashboard() {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
 
+    const fetchTeams = useCallback(async () => {
+        try {
+            const response = await axios.get(`${API}/admin/teams`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setTeams(response.data);
+        } catch (error) {
+            console.error('Error fetching teams:', error);
+        }
+    }, [token]);
+
     const fetchUsers = useCallback(async () => {
         try {
-            const response = await axios.get('https://api.iplvote.co.in/admin/users', {
+            const response = await axios.get(`${API}/admin/users`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUsers(response.data);
@@ -25,7 +39,7 @@ function AdminDashboard() {
 
     const fetchMatches = useCallback(async () => {
         try {
-            const response = await axios.get('https://api.iplvote.co.in/admin/matches', {
+            const response = await axios.get(`${API}/admin/matches`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setMatches(response.data);
@@ -41,11 +55,12 @@ function AdminDashboard() {
         }
         fetchUsers();
         fetchMatches();
+        fetchTeams();
     }, [token, role, navigate, fetchUsers, fetchMatches]);
 
     const addUser = async (userData) => {
         try {
-            await axios.post('https://api.iplvote.co.in/admin/users', userData, {
+            await axios.post(`${API}/admin/users`, userData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchUsers();
@@ -57,7 +72,7 @@ function AdminDashboard() {
 
     const addMatch = async (matchData) => {
         try {
-            await axios.post('https://api.iplvote.co.in/admin/matches', matchData, {
+            await axios.post(`${API}/admin/matches`, matchData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchMatches();
@@ -69,7 +84,7 @@ function AdminDashboard() {
 
     const resetPassword = async (userId, newPassword) => {
         try {
-            await axios.post(`https://api.iplvote.co.in/admin/users/${userId}/reset-password`, 
+            await axios.post(`${API}/admin/users/${userId}/reset-password`, 
                 { newPassword }, 
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -81,7 +96,7 @@ function AdminDashboard() {
 
     const setWinner = async (matchId, winnerTeam) => {
         try {
-            await axios.post('https://api.iplvote.co.in/admin/set-winner', 
+            await axios.post(`${API}/admin/set-winner`, 
                 { match_id: matchId, winnerTeam }, 
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -211,14 +226,31 @@ function AdminDashboard() {
                                     addMatch({
                                         team1: formData.get('team1'),
                                         team2: formData.get('team2'),
-                                        match_date: formData.get('matchDate')
+                                        match_date: formData.get('matchDate'),
+                                        votingDeadline: formData.get('votingDeadline') || null
                                     });
                                     e.target.reset();
                                 }} className="grid grid-cols-2 gap-4">
-                                    <input name="team1" placeholder="Team 1" className="p-3 rounded-lg bg-white/20 text-white placeholder-gray-300" required />
-                                    <input name="team2" placeholder="Team 2" className="p-3 rounded-lg bg-white/20 text-white placeholder-gray-300" required />
+                                    <div className="space-y-1">
+                                        <label className="text-xs text-gray-300">Team 1</label>
+                                        <select name="team1" className="w-full p-3 rounded-lg bg-white/20 text-white" required>
+                                            <option value="">Select Team 1</option>
+                                            {teams.map(t => <option key={t.id} value={t.team_name}>{t.team_name}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs text-gray-300">Team 2</label>
+                                        <select name="team2" className="w-full p-3 rounded-lg bg-white/20 text-white" required>
+                                            <option value="">Select Team 2</option>
+                                            {teams.map(t => <option key={t.id} value={t.team_name}>{t.team_name}</option>)}
+                                        </select>
+                                    </div>
                                     <input name="matchDate" type="date" className="p-3 rounded-lg bg-white/20 text-white" required />
-                                    <button type="submit" className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg">
+                                    <div className="space-y-1">
+                                        <label className="text-xs text-gray-300">Voting Deadline (IST)</label>
+                                        <input name="votingDeadline" type="datetime-local" className="w-full p-3 rounded-lg bg-white/20 text-white" />
+                                    </div>
+                                    <button type="submit" className="col-span-2 bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg">
                                         Add Match
                                     </button>
                                 </form>
@@ -232,6 +264,9 @@ function AdminDashboard() {
                                         <div key={match.id} className="flex justify-between items-center bg-white/10 p-4 rounded-lg">
                                             <div className="text-white">
                                                 <span className="font-semibold">{match.team1} vs {match.team2}</span> - {match.match_date}
+                                                {match.votingDeadline && (
+                                                    <span className="ml-4 text-yellow-300 text-sm">Deadline: {new Date(match.votingDeadline).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</span>
+                                                )}
                                             </div>
                                         </div>
                                     ))}

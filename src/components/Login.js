@@ -3,24 +3,33 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import InfoModal from './InfoModal';
 
+const API = process.env.REACT_APP_API_URL;
+
 function Login({ setToken, setName, setUserID }) {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [currentPassword, setCurrentPassword] = useState('');
+    const [transactionId, setTransactionId] = useState('');
     const [newPassword, setNewPassword] = useState('');
+    const [newUsername, setNewUsername] = useState('');
     const [loading, setLoading] = useState(false);
     const [isRegister, setIsRegister] = useState(false);
-    const [isChangePassword, setIsChangePassword] = useState(false);
+    const [isReset, setIsReset] = useState(false);
+    const [resetVerified, setResetVerified] = useState(false);
+    const [resetAction, setResetAction] = useState(''); // 'password' or 'username'
     const [showInfoModal, setShowInfoModal] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true);
-        
-        if (isChangePassword) {
-            await handleChangePassword();
+
+        if (isReset) {
+            if (!resetVerified) {
+                await handleVerifyTransaction();
+            } else {
+                await handleReset();
+            }
         } else if (isRegister) {
             await handleRegister();
         } else {
@@ -30,7 +39,7 @@ function Login({ setToken, setName, setUserID }) {
 
     const handleLogin = async () => {
         try {
-            const response = await axios.post('https://api.iplvote.co.in/login',
+            const response = await axios.post(`${API}/login`,
                 { username, password },
                 { 
                     headers: {
@@ -60,47 +69,52 @@ function Login({ setToken, setName, setUserID }) {
 
     const handleRegister = async () => {
         try {
-            await axios.post('https://api.iplvote.co.in/register',
-                { username, email, password },
-                { 
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
+            await axios.post(`${API}/register`,
+                { username, email, password, transactionId },
+                { headers: { 'Content-Type': 'application/json' } }
             );
             alert('Registration successful! Please login with your username.');
             setIsRegister(false);
+            setTransactionId('');
         } catch (error) {
-            if (error.response?.data?.error) {
-                alert(error.response.data.error);
-            } else {
-                alert('Registration failed, please try again.');
-            }
+            alert(error.response?.data?.error || 'Registration failed, please try again.');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleChangePassword = async () => {
+    const handleVerifyTransaction = async () => {
         try {
-            await axios.post('https://api.iplvote.co.in/change-password',
-                { username, currentPassword, newPassword },
-                { 
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
+            await axios.post(`${API}/verify-transaction`,
+                { username, transactionId },
+                { headers: { 'Content-Type': 'application/json' } }
             );
-            alert('Password changed successfully!');
-            setIsChangePassword(false);
-            setCurrentPassword('');
-            setNewPassword('');
+            setResetVerified(true);
         } catch (error) {
-            if (error.response?.data?.error) {
-                alert(error.response.data.error);
-            } else {
-                alert('Failed to change password, please try again.');
-            }
+            alert(error.response?.data?.error || 'Verification failed.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleReset = async () => {
+        try {
+            const body = { username, transactionId };
+            if (resetAction === 'password') body.newPassword = newPassword;
+            else body.newUsername = newUsername;
+
+            const response = await axios.post(`${API}/reset`, body,
+                { headers: { 'Content-Type': 'application/json' } }
+            );
+            alert(response.data.message);
+            setIsReset(false);
+            setResetVerified(false);
+            setResetAction('');
+            setTransactionId('');
+            setNewPassword('');
+            setNewUsername('');
+        } catch (error) {
+            alert(error.response?.data?.error || 'Reset failed.');
         } finally {
             setLoading(false);
         }
@@ -125,9 +139,13 @@ function Login({ setToken, setName, setUserID }) {
                     </div>
                     <h1 className="text-4xl font-bold text-white mb-2">IPL Voting</h1>
                     <p className="text-gray-300">
-                        {isChangePassword ? 'Change your account password' : 
-                         isRegister ? 'Create your account to get started' : 
-                         'Welcome back! Please sign in to continue'}
+                        {isReset
+                            ? resetVerified
+                                ? `Choose what to update`
+                                : 'Verify your transaction ID'
+                            : isRegister
+                            ? 'Create your account to get started'
+                            : 'Welcome back! Please sign in to continue'}
                     </p>
                 </div>
 
@@ -157,137 +175,137 @@ function Login({ setToken, setName, setUserID }) {
                             </div>
                         </div>
 
-                        {/* Email Input - Only for Register */}
+                        {/* Email - Register only */}
                         {isRegister && (
                             <div className="space-y-2">
-                                <label htmlFor="email" className="text-sm font-medium text-gray-200 block">
-                                    Email
-                                </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                                        </svg>
-                                    </div>
-                                    <input
-                                        type="email"
-                                        id="email"
-                                        placeholder="Enter your email"
-                                        className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        required
-                                    />
-                                </div>
+                                <label htmlFor="email" className="text-sm font-medium text-gray-200 block">Email</label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    placeholder="Enter your email"
+                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
                             </div>
                         )}
 
-                        {/* Current Password Input - Only for Change Password */}
-                        {isChangePassword && (
+                        {/* Password - Login and Register only */}
+                        {!isReset && (
                             <div className="space-y-2">
-                                <label htmlFor="currentPassword" className="text-sm font-medium text-gray-200 block">
-                                    Current Password
-                                </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                        </svg>
-                                    </div>
-                                    <input
-                                        type="password"
-                                        id="currentPassword"
-                                        placeholder="Enter your current password"
-                                        className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm"
-                                        value={currentPassword}
-                                        onChange={(e) => setCurrentPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
+                                <label htmlFor="password" className="text-sm font-medium text-gray-200 block">Password</label>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    placeholder="Enter your password"
+                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
                             </div>
                         )}
 
-                        {/* Password Input */}
-                        {!isChangePassword && (
+                        {/* Transaction ID - Register and Reset (step 1) */}
+                        {(isRegister || (isReset && !resetVerified)) && (
                             <div className="space-y-2">
-                                <label htmlFor="password" className="text-sm font-medium text-gray-200 block">
-                                    Password
-                                </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                        </svg>
-                                    </div>
-                                    <input
-                                        type="password"
-                                        id="password"
-                                        placeholder="Enter your password"
-                                        className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
+                                <label htmlFor="transactionId" className="text-sm font-medium text-gray-200 block">Transaction ID</label>
+                                <input
+                                    type="text"
+                                    id="transactionId"
+                                    placeholder="Enter your transaction ID"
+                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    value={transactionId}
+                                    onChange={(e) => setTransactionId(e.target.value)}
+                                    required
+                                />
                             </div>
                         )}
 
-                        {/* New Password Input - Only for Change Password */}
-                        {isChangePassword && (
+                        {/* Reset Step 2 - Choose action */}
+                        {isReset && resetVerified && !resetAction && (
+                            <div className="flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setResetAction('password')}
+                                    className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl"
+                                >
+                                    Update Password
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setResetAction('username')}
+                                    className="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 rounded-xl"
+                                >
+                                    Update Username
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Reset Step 2 - New Password */}
+                        {isReset && resetVerified && resetAction === 'password' && (
                             <div className="space-y-2">
-                                <label htmlFor="newPassword" className="text-sm font-medium text-gray-200 block">
-                                    New Password
-                                </label>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                        </svg>
-                                    </div>
-                                    <input
-                                        type="password"
-                                        id="newPassword"
-                                        placeholder="Enter your new password"
-                                        className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm"
-                                        value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
+                                <label className="text-sm font-medium text-gray-200 block">New Password</label>
+                                <input
+                                    type="password"
+                                    placeholder="Enter new password"
+                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    required
+                                />
                             </div>
                         )}
 
-                        {/* Submit Button */}
+                        {/* Reset Step 2 - New Username */}
+                        {isReset && resetVerified && resetAction === 'username' && (
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-200 block">New Username</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter new username"
+                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    value={newUsername}
+                                    onChange={(e) => setNewUsername(e.target.value)}
+                                    required
+                                />
+                            </div>
+                        )}
+
+                        {/* Submit Button - hide when choosing reset action */}
+                        {!(isReset && resetVerified && !resetAction) && (
                         <button
                             type="submit"
                             disabled={loading}
                             className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
                         >
                             {loading ? (
-                                <>
-                                    <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    <span>{isChangePassword ? 'Changing password...' : isRegister ? 'Creating account...' : 'Signing in...'}</span>
-                                </>
+                                <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
                             ) : (
-                                <>
-                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isChangePassword ? "M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 12H9v4a2 2 0 01-2 2H5v2a2 2 0 01-2 2H1v-2.5A2.5 2.5 0 013.5 19.5h1.294A8.972 8.972 0 013 12a9 9 0 0118 0z" : isRegister ? "M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" : "M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"} />
-                                    </svg>
-                                    <span>{isChangePassword ? 'Change Password' : isRegister ? 'Create Account' : 'Sign In'}</span>
-                                </>
+                                <span>
+                                    {isReset && !resetVerified ? 'Verify Transaction ID'
+                                        : isReset && resetVerified ? 'Update'
+                                        : isRegister ? 'Create Account'
+                                        : 'Sign In'}
+                                </span>
                             )}
                         </button>
+                        )}
 
-                        {/* Toggle between Login, Register, and Change Password */}
+                        {/* Toggle buttons */}
                         <div className="text-center space-y-2">
                             <button
                                 type="button"
                                 onClick={() => {
                                     setIsRegister(!isRegister);
-                                    setIsChangePassword(false);
+                                    setIsReset(false);
+                                    setResetVerified(false);
+                                    setResetAction('');
+                                    setTransactionId('');
                                 }}
                                 className="text-gray-300 hover:text-white transition-colors duration-200 text-sm underline block w-full"
                             >
@@ -297,12 +315,15 @@ function Login({ setToken, setName, setUserID }) {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setIsChangePassword(!isChangePassword);
+                                        setIsReset(!isReset);
                                         setIsRegister(false);
+                                        setResetVerified(false);
+                                        setResetAction('');
+                                        setTransactionId('');
                                     }}
                                     className="text-gray-300 hover:text-white transition-colors duration-200 text-sm underline block w-full"
                                 >
-                                    {isChangePassword ? 'Back to login' : 'Change password'}
+                                    {isReset ? 'Back to login' : 'Forgot username / password?'}
                                 </button>
                             )}
                         </div>
@@ -339,7 +360,7 @@ function Login({ setToken, setName, setUserID }) {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                <span>Login as Admin</span>
+                                <span>Staff Login (Admin / Accountant)</span>
                             </button>
                         </div>
                         <p className="text-xs text-gray-400">

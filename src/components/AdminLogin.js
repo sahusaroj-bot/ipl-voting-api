@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const API = process.env.REACT_APP_API_URL;
+
 function AdminLogin() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -13,7 +15,7 @@ function AdminLogin() {
         setLoading(true);
         
         try {
-            const response = await axios.post('https://api.iplvote.co.in/login',
+            const response = await axios.post(`${API}/login`,
                 { username, password },
                 { 
                     headers: {
@@ -22,19 +24,22 @@ function AdminLogin() {
                 }
             );
             
-            if (response.data.role !== 'ADMIN') {
-                alert('Access denied. Admin privileges required.');
+            if (response.data.role !== 'ADMIN' && response.data.role !== 'ACCOUNTANT') {
+                alert('Access denied. Admin or Accountant privileges required.');
                 setLoading(false);
                 return;
             }
-            
+
             localStorage.setItem('token', response.data.accessToken);
             localStorage.setItem('name', response.data.username);
             localStorage.setItem('userID', response.data.userId);
             localStorage.setItem('role', response.data.role);
-            
-            alert(`Admin login successful! Welcome ${response.data.username}`);
-            navigate('/admin-dashboard');
+
+            if (response.data.role === 'ACCOUNTANT') {
+                navigate('/accountant-dashboard');
+            } else {
+                navigate('/admin-dashboard');
+            }
         } catch (error) {
             if (error.response?.data?.error) {
                 alert(error.response.data.error);
@@ -64,8 +69,8 @@ function AdminLogin() {
                             <path fillRule="evenodd" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" clipRule="evenodd" />
                         </svg>
                     </div>
-                    <h1 className="text-4xl font-bold text-white mb-2">IPL Admin Control</h1>
-                    <p className="text-gray-300">Secure administrator login portal</p>
+                    <h1 className="text-4xl font-bold text-white mb-2">IPL Staff Portal</h1>
+                    <p className="text-gray-300">Login as Admin or Accountant</p>
                 </div>
 
                 {/* Form */}
@@ -136,7 +141,7 @@ function AdminLogin() {
                                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    <span>Admin Login</span>
+                                    <span>Login</span>
                                 </>
                             )}
                         </button>

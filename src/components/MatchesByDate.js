@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { formatInTimeZone } from 'date-fns-tz';
 
+const API = process.env.REACT_APP_API_URL;
+
 function MatchesByDate() {
     const [today, setToday] = useState('');
     const [matches, setMatches] = useState([]);
@@ -31,7 +33,7 @@ function MatchesByDate() {
         const fetchMatchesByDate = async (date) => {
             try {
                 // Axios GET request for fetching matches
-                const response = await axios.get(`https://api.iplvote.co.in/by-date`, {
+                const response = await axios.get(`${API}/by-date`, {
                     params: { date }, // Sending date as a query parameter
                     headers: {
                         Authorization: `Bearer ${token}` // Setting Authorization header
@@ -48,7 +50,7 @@ function MatchesByDate() {
         const fetchMoney = async () => {
             try {
                 // Axios GET request for fetching money
-                const response = await axios.get(`https://api.iplvote.co.in/getMoney`, {
+                const response = await axios.get(`${API}/getMoney`, {
                     params: { id: userID }, // Sending user ID as a query parameter
                     headers: {
                         Authorization: `Bearer ${token}` // Setting Authorization header
@@ -66,18 +68,28 @@ function MatchesByDate() {
         fetchMoney();
     }, [token, userID]); // Dependencies ensure this runs when token or userID changes
 
+    const isVotingClosed = (deadline) => {
+        if (!deadline) return false;
+        return new Date() > new Date(deadline);
+    };
+
+    const formatDeadline = (deadline) => {
+        if (!deadline) return null;
+        return new Date(deadline).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });
+    };
+
     // Function to post a vote
     const postVote = async (team, matchid) => {
         try {
             // JSON data for POST request
             const jsonData = {
-                user_id: userID, // User ID
-                match_id: matchid, // Match ID
-                voted_team_name: team // Team name voted for
+                user_id: parseInt(userID),
+                match_id: matchid,
+                voted_team_name: team
             };
 
             // Axios POST request for submitting a vote
-            const response = await axios.post(`https://api.iplvote.co.in/Insertvote`, jsonData, {
+            const response = await axios.post(`${API}/Insertvote`, jsonData, {
                 headers: {
                     Authorization: `Bearer ${token}`, // Setting Authorization header
                     'Content-Type': 'application/json' // Setting content type
@@ -85,16 +97,14 @@ function MatchesByDate() {
             });
 
             if (response.status === 200) {
-                // Handling successful response
-                setServerResponse('Success: Vote saved successfully');
-                alert("Vote saved successfully");
-            } else {
-                // Handling duplicate voting scenario
-                setServerResponse(response.data.message);
-                alert("Duplicate voting is not allowed.");
+                setServerResponse('Vote saved successfully');
+                alert('Vote saved successfully');
+                setTimeout(() => setServerResponse(''), 3000);
             }
         } catch (error) {
-            console.error('Error posting vote:', error); // Logging error if POST request fails
+            const msg = error.response?.data?.error || 'Error posting vote';
+            alert(msg);
+            console.error('Error posting vote:', error);
         }
     };
 
@@ -211,15 +221,28 @@ function MatchesByDate() {
                         <div className="grid gap-6 md:gap-8">
                             {matches.map(match => (
                                 <div key={match.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 border border-white/20 shadow-xl">
+                                    {/* Deadline badge */}
+                                    <div className="flex justify-between items-center mb-4">
+                                        <span className="text-gray-300 text-sm">Match #{match.id}</span>
+                                        {match.votingDeadline && (
+                                            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                                                isVotingClosed(match.votingDeadline)
+                                                    ? 'bg-red-500/30 text-red-300'
+                                                    : 'bg-green-500/30 text-green-300'
+                                            }`}>
+                                                {isVotingClosed(match.votingDeadline)
+                                                    ? '🔒 Voting Closed'
+                                                    : `⏰ Vote by ${formatDeadline(match.votingDeadline)}`}
+                                            </span>
+                                        )}
+                                    </div>
                                     <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
                                         {/* Team 1 */}
                                         <button
                                             onClick={() => handleTeamClick(match.team1, match.id)}
-                                            className="group flex-1 max-w-xs bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-3"
+                                            disabled={isVotingClosed(match.votingDeadline)}
+                                            className="group flex-1 max-w-xs bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                                         >
-                                            <svg className="w-6 h-6 group-hover:animate-pulse" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                            </svg>
                                             <span className="text-lg">{match.team1}</span>
                                         </button>
 
@@ -233,11 +256,9 @@ function MatchesByDate() {
                                         {/* Team 2 */}
                                         <button
                                             onClick={() => handleTeamClick(match.team2, match.id)}
-                                            className="group flex-1 max-w-xs bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-3"
+                                            disabled={isVotingClosed(match.votingDeadline)}
+                                            className="group flex-1 max-w-xs bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                                         >
-                                            <svg className="w-6 h-6 group-hover:animate-pulse" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                            </svg>
                                             <span className="text-lg">{match.team2}</span>
                                         </button>
                                     </div>

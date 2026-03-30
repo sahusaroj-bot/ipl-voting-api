@@ -7,6 +7,7 @@ import MatchesByDate from './components/MatchesByDate';
 import AccountantDashboard from './components/AccountantDashboard';
 import Results from './components/Results';
 import TodayVotes from './components/TodayVotes';
+import LeaderboardView from './components/LeaderboardView';
 import './App.css';
 
 function App() {
@@ -45,7 +46,8 @@ function App() {
                     <Route path="/matches-by-date" element={token ? <MatchesByDate token={token} userID={userID} name={name} /> : <Navigate to="/login" />} />
                     <Route path="/previous-results" element={<Results />} />
                     <Route path="/today-votes" element={<TodayVotes />} />
-                    <Route path="*" element={<Navigate to="/login" />} />
+                    <Route path="/leaderboard" element={token ? <LeaderboardView /> : <Navigate to="/login" />} />
+                    <Route path="*" element={<Navigate to={token ? '/matches-by-date' : '/login'} />} />
                 </Routes>
             </div>
         </Router>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Navbar from './Navbar';
 
 const API = process.env.REACT_APP_API_URL;
 
@@ -44,54 +45,33 @@ function Countdown({ deadline, onExpire }) {
     );
 }
 
-function VoterCard({ team, voters, isWinner, color }) {
-    const gradients = {
-        blue: 'from-blue-600/30 to-blue-900/30 border-blue-500/30',
-        orange: 'from-orange-600/30 to-orange-900/30 border-orange-500/30',
+function VoterCard({ team, voters, color }) {
+    const styles = {
+        blue:   { wrap: 'from-blue-600/20 to-blue-900/20 border-blue-500/25',   badge: 'bg-blue-500/20 border-blue-400/30 text-blue-200',   head: 'text-blue-300',   avatar: 'bg-blue-500/40 text-blue-200' },
+        orange: { wrap: 'from-orange-600/20 to-orange-900/20 border-orange-500/25', badge: 'bg-orange-500/20 border-orange-400/30 text-orange-200', head: 'text-orange-300', avatar: 'bg-orange-500/40 text-orange-200' },
     };
-    const badges = {
-        blue: 'bg-blue-500/20 border-blue-400/30 text-blue-200',
-        orange: 'bg-orange-500/20 border-orange-400/30 text-orange-200',
-    };
-    const headers = {
-        blue: 'text-blue-300',
-        orange: 'text-orange-300',
-    };
-
+    const s = styles[color];
     return (
-        <div className={`flex-1 bg-gradient-to-b ${gradients[color]} border rounded-2xl p-5 relative overflow-hidden`}>
-            {/* subtle glow */}
-            <div className={`absolute inset-0 opacity-10 ${color === 'blue' ? 'bg-blue-400' : 'bg-orange-400'} blur-2xl rounded-2xl`} />
-
-            <div className="relative z-10">
-                <div className="text-center mb-4">
-                    <h3 className={`font-extrabold text-xl ${headers[color]} tracking-wide`}>{team}</h3>
-                    <div className={`inline-flex items-center gap-1 mt-1 px-3 py-0.5 rounded-full text-xs font-semibold ${badges[color]} border`}>
-                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                        </svg>
-                        {voters.length} {voters.length === 1 ? 'vote' : 'votes'}
-                    </div>
-                </div>
-
-                {voters.length === 0 ? (
-                    <div className="text-center py-6">
-                        <div className="text-3xl mb-2">🏏</div>
-                        <p className="text-gray-500 text-sm">No votes yet</p>
-                    </div>
-                ) : (
-                    <div className="flex flex-wrap gap-2 justify-center">
-                        {voters.map((name, i) => (
-                            <div key={i} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium ${badges[color]}`}>
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${color === 'blue' ? 'bg-blue-500/40 text-blue-200' : 'bg-orange-500/40 text-orange-200'}`}>
-                                    {name.charAt(0).toUpperCase()}
-                                </div>
-                                {name}
-                            </div>
-                        ))}
-                    </div>
-                )}
+        <div className={`flex-1 min-w-0 bg-gradient-to-b ${s.wrap} border rounded-2xl p-4`}>
+            <div className="text-center mb-3">
+                <h3 className={`font-extrabold text-base sm:text-lg ${s.head} truncate`}>{team}</h3>
+                <span className={`inline-flex items-center gap-1 mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${s.badge} border`}>
+                    {voters.length} {voters.length === 1 ? 'vote' : 'votes'}
+                </span>
             </div>
+            {voters.length === 0
+                ? <div className="text-center py-4"><p className="text-gray-500 text-sm">No votes yet</p></div>
+                : <div className="flex flex-wrap gap-1.5 justify-center">
+                    {voters.map((name, i) => (
+                        <div key={i} className={`flex items-center gap-1 px-2 py-1 rounded-full border text-xs font-medium ${s.badge}`}>
+                            <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold ${s.avatar}`}>
+                                {name.charAt(0).toUpperCase()}
+                            </div>
+                            <span className="max-w-[80px] truncate">{name}</span>
+                        </div>
+                    ))}
+                </div>
+            }
         </div>
     );
 }
@@ -166,7 +146,7 @@ function MatchCard({ match, onDeadlineExpire }) {
 
                 {/* Voter reveal — only after deadline */}
                 {isPassed ? (
-                    <div className="flex gap-4 mt-5">
+                    <div className="flex flex-col sm:flex-row gap-3 mt-5">
                         <VoterCard team={match.team1} voters={match.team1Voters} color="blue" />
                         <VoterCard team={match.team2} voters={match.team2Voters} color="orange" />
                     </div>
@@ -210,36 +190,13 @@ export default function TodayVotes() {
     });
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-blue-950 to-purple-950 relative">
-            {/* Background blobs */}
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="min-h-screen bg-[#0d0d1a] relative">
+            <div className="fixed inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/8 rounded-full blur-3xl" />
+                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/8 rounded-full blur-3xl" />
+            </div>
 
-            {/* Nav */}
-            <nav className="relative z-10 bg-white/5 backdrop-blur-xl border-b border-white/10 px-6 py-4">
-                <div className="max-w-3xl mx-auto flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 className="text-white font-bold text-lg leading-none">Today's Votes</h1>
-                            <p className="text-gray-400 text-xs mt-0.5">{today}</p>
-                        </div>
-                    </div>
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="flex items-center gap-2 text-gray-400 hover:text-white text-sm transition-colors px-3 py-1.5 rounded-lg hover:bg-white/10"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                        Back
-                    </button>
-                </div>
-            </nav>
+            <Navbar />
 
             <div className="relative z-10 max-w-3xl mx-auto px-4 py-10">
                 {loading ? (

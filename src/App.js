@@ -45,9 +45,9 @@ function App() {
                     <Route path="/accountant-dashboard" element={<AccountantDashboard />} />
                     <Route path="/matches-by-date" element={token ? <MatchesByDate token={token} userID={userID} name={name} /> : <Navigate to="/login" />} />
                     <Route path="/previous-results" element={<Results />} />
-                    <Route path="/today-votes" element={<TodayVotes />} />
+                    <Route path="/today-votes" element={token ? <TodayVotes /> : <Navigate to="/login" />} />
                     <Route path="/leaderboard" element={token ? <LeaderboardView /> : <Navigate to="/login" />} />
-                    <Route path="*" element={<Navigate to={token ? '/matches-by-date' : '/login'} />} />
+                    <Route path="*" element={<Navigate to={token ? '/matches-by-date' : '/login'} replace />} />
                 </Routes>
             </div>
         </Router>

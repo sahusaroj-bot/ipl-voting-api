@@ -58,7 +58,7 @@ function PodiumCard({ user, rank }) {
                 </p>
 
                 <div className={`mt-1.5 px-2 sm:px-3 py-0.5 rounded-full bg-gradient-to-r ${p.badge} ${p.text} font-extrabold text-xs shadow`}>
-                    ₹{user.totalAmount?.toFixed(0)}
+                    ₹{user.totalAmount?.toFixed(2)}
                 </div>
 
                 <div className="absolute -top-2.5 -right-2.5 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#1a1a2e] border border-white/20 flex items-center justify-center text-white font-bold text-xs">
@@ -108,13 +108,13 @@ function LeaderboardRow({ user, rank, currentUserID }) {
             {/* last win amount — hide on very small */}
             {user.lastSavedAmount > 0 && (
                 <span className="hidden sm:block text-xs text-green-400 font-medium shrink-0">
-                    +₹{user.lastSavedAmount?.toFixed(0)}
+                    +₹{user.lastSavedAmount?.toFixed(2)}
                 </span>
             )}
 
             {/* total */}
             <div className={`font-bold text-sm sm:text-base shrink-0 ${isMe ? 'text-orange-300' : 'text-white'}`}>
-                ₹{user.totalAmount?.toFixed(0)}
+                ₹{user.totalAmount?.toFixed(2)}
             </div>
         </div>
     );
@@ -181,7 +181,7 @@ export default function LeaderboardView() {
                             <div className="text-right shrink-0">
                                 <p className="text-gray-500 text-xs">Winnings</p>
                                 <p className="text-orange-300 font-extrabold text-lg sm:text-xl">
-                                    ₹{currentUser?.totalAmount?.toFixed(0) ?? '0'}
+                                    ₹{currentUser?.totalAmount?.toFixed(2) ?? '0.00'}
                                 </p>
                             </div>
                         </div>

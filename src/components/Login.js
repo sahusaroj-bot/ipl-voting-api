@@ -209,7 +209,7 @@ export default function Login({ setToken, setName, setUserID }) {
                         <span className="text-3xl">🏏</span>
                     </div>
                     <h1 className="text-3xl font-black text-white">IPL Voting</h1>
-                    <p className="text-gray-500 text-sm mt-1">2025 Season</p>
+                    <p className="text-gray-500 text-sm mt-1">2026 Season</p>
                 </div>
 
                 <div className="w-full max-w-sm lg:max-w-md">

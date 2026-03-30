@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 
 const API = process.env.REACT_APP_API_URL;
@@ -165,7 +164,6 @@ function MatchCard({ match, onDeadlineExpire }) {
 export default function TodayVotes() {
     const [matches, setMatches] = useState([]);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
 
     const fetchVotes = useCallback(async () => {
         try {
@@ -184,10 +182,6 @@ export default function TodayVotes() {
     const handleDeadlineExpire = useCallback(() => {
         setTimeout(fetchVotes, 2000); // small delay to let backend catch up
     }, [fetchVotes]);
-
-    const today = new Date().toLocaleDateString('en-IN', {
-        timeZone: 'Asia/Kolkata', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-    });
 
     return (
         <div className="min-h-screen bg-[#0d0d1a] relative">
